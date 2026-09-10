@@ -51,19 +51,18 @@ phases suivantes non couvertes par ce prompt.
 
 ## Build
 
-Ce dépôt ne contient pas le binaire `gradle-wrapper.jar` (généré par Android
-Studio ou `gradle wrapper` à l'ouverture du projet, pas de réseau disponible
-dans cet environnement). Pour builder :
-
 ```bash
-# Si vous avez un Gradle local installé :
-gradle wrapper --gradle-version 8.7
-./gradlew build
-./gradlew test
+./gradlew assembleDebug        # APK debug
+./gradlew testDebugUnitTest    # tests unitaires
+./gradlew lintDebug            # analyse statique
 ```
 
-Ou ouvrez simplement le dossier dans Android Studio : le wrapper sera
-régénéré automatiquement au premier sync.
+> Si `gradlew` / `gradle/wrapper/gradle-wrapper.jar` sont absents (premier
+> clone d'un environnement sans réseau), régénérez-les une fois avec un Gradle
+> local : `gradle wrapper --gradle-version 8.7`, puis commitez-les.
+
+Room exporte le schéma versionné de la base dans `app/schemas/` (requis pour les
+migrations et leurs tests).
 
 ## Permissions requises
 
