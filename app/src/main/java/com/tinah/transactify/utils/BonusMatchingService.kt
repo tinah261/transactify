@@ -2,50 +2,57 @@ package com.tinah.transactify.utils
 
 import com.tinah.transactify.data.db.dao.TransactionDao
 import com.tinah.transactify.data.db.entity.Transaction
+import com.tinah.transactify.domain.model.TransactionType
+import com.tinah.transactify.domain.usecase.CalculateProfitUseCase
 import kotlinx.coroutines.flow.first
+import timber.log.Timber
 
+/**
+ * Rapproche un SMS de bonus / récompense de sa transaction mère (l'envoi qui l'a
+ * déclenché) : le montant du bonus est absorbé dans la transaction mère et le
+ * SMS orphelin est supprimé.
+ */
 class BonusMatchingService(
-    private val transactionDao: TransactionDao
+    private val transactionDao: TransactionDao,
+    private val calculateProfit: CalculateProfitUseCase,
 ) {
 
     suspend fun matchBonusToTransaction(bonusTransaction: Transaction) {
         if (bonusTransaction.bonusLinked) return
 
-        val parentTransactions = transactionDao
+        val candidates = transactionDao
             .getTransactionsByDateRange(
-                bonusTransaction.timestamp - 120_000, // -2 minutes
-                bonusTransaction.timestamp
+                bonusTransaction.timestamp - Constants.BONUS_MATCH_WINDOW_MS,
+                bonusTransaction.timestamp,
             )
             .first()
 
-        val parent = parentTransactions.find { candidate ->
-            candidate.reference == bonusTransaction.reference &&
+        val parent = candidates.firstOrNull { candidate ->
+            candidate.id != bonusTransaction.id &&
+                candidate.reference == bonusTransaction.reference &&
                 candidate.operator == bonusTransaction.operator &&
-                candidate.transactionType == "ENVOYÉ"
-        } ?: return
-
-        val updatedParent = parent.copy(
-            bonusAmount = bonusTransaction.amount,
-            bonusLinked = true,
-            profitCalculated = calculateProfit(parent.amount, parent.operator, parent.transactionType) +
-                bonusTransaction.amount
-        )
-        transactionDao.updateTransaction(updatedParent)
-
-        // La transaction bonus est absorbée dans la transaction mère : on supprime l'orpheline.
-        transactionDao.deleteTransaction(bonusTransaction)
-    }
-
-    private fun calculateProfit(amount: Double, operator: String, type: String): Double {
-        val rate = when {
-            operator == "Orange Money" && type == "REÇU" -> 0.02
-            operator == "Orange Money" && type == "ENVOYÉ" -> 0.03
-            operator == "Airtel Money" && type == "REÇU" -> 0.025
-            operator == "Airtel Money" && type == "ENVOYÉ" -> 0.035
-            operator == "M-Vola" && type == "REÇU" -> 0.022
-            operator == "M-Vola" && type == "ENVOYÉ" -> 0.032
-            else -> 0.0
+                candidate.transactionType == TransactionType.ENVOYE.storageValue
         }
-        return amount * rate
+
+        if (parent == null) {
+            Timber.d("Bonus #%d sans transaction mère (ref %s)", bonusTransaction.id, bonusTransaction.reference)
+            return
+        }
+
+        val baseProfit = calculateProfit.forStoredValues(
+            amount = parent.amount,
+            operatorStorageValue = parent.operator,
+            typeStorageValue = parent.transactionType,
+        )
+
+        transactionDao.updateTransaction(
+            parent.copy(
+                bonusAmount = bonusTransaction.amount,
+                bonusLinked = true,
+                profitCalculated = baseProfit + bonusTransaction.amount,
+            ),
+        )
+        transactionDao.deleteTransaction(bonusTransaction)
+        Timber.d("Bonus #%d rattaché à la transaction #%d", bonusTransaction.id, parent.id)
     }
 }

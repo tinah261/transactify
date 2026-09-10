@@ -33,10 +33,23 @@ class TransactionRepository(
     fun getLatestTransactions(limit: Int = 50): Flow<List<Transaction>> =
         transactionDao.getLatestTransactions(limit)
 
-    suspend fun insertTransaction(transaction: Transaction) {
-        transactionDao.insertTransaction(transaction)
+    /** Insère une transaction, met à jour les stats du client et renvoie l'id généré. */
+    suspend fun insertTransaction(transaction: Transaction): Long {
+        val id = transactionDao.insertTransaction(transaction)
         updateClientStats(transaction.phoneNumber)
+        return id
     }
+
+    /**
+     * Vrai si une transaction identique (même opérateur, horodatage, montant et
+     * sens) existe déjà — protection contre le retraitement d'un même SMS.
+     */
+    suspend fun isDuplicate(
+        operator: String,
+        timestamp: Long,
+        amount: Double,
+        type: String,
+    ): Boolean = transactionDao.countMatching(operator, timestamp, amount, type) > 0
 
     suspend fun updateTransaction(transaction: Transaction) {
         transactionDao.updateTransaction(transaction)

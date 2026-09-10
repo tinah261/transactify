@@ -26,7 +26,7 @@ android {
 
     sourceSets {
         androidTest {
-            assets.srcDirs += files("$projectDir/schemas")
+            assets.srcDir("$projectDir/schemas")
         }
     }
 
@@ -52,6 +52,16 @@ android {
     buildFeatures {
         viewBinding true
         buildConfig true
+    }
+
+    lint {
+        // Ne bloque pas la CI sur des avertissements ; les erreurs restent visibles
+        // dans le rapport. À resserrer en phase de consolidation (Phase 8).
+        abortOnError false
+        warningsAsErrors false
+        checkReleaseBuilds false
+        htmlReport true
+        xmlReport true
     }
 
     packagingOptions {

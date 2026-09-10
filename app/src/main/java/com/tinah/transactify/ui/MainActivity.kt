@@ -1,21 +1,31 @@
 package com.tinah.transactify.ui
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.tinah.transactify.data.service.CashPointForegroundService
 import com.tinah.transactify.databinding.ActivityMainBinding
+import com.tinah.transactify.utils.PermissionHelper
+import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { results ->
+        val smsGranted = PermissionHelper.SMS_PERMISSIONS.all { results[it] == true }
+        if (smsGranted || PermissionHelper.hasSmsPermissions(this)) {
+            startCashPointService()
+        } else {
+            Timber.w("Permissions SMS refusées — la capture des transactions est désactivée")
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,44 +33,18 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        requestRequiredPermissions()
         setupNavigation()
+        ensurePermissions()
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == SMS_PERMISSION_REQUEST_CODE &&
-            grantResults.isNotEmpty() &&
-            grantResults.all { it == PackageManager.PERMISSION_GRANTED }
-        ) {
-            startCashPointService()
-        }
-    }
-
-    private fun requestRequiredPermissions() {
-        val permissions = mutableListOf(
-            Manifest.permission.RECEIVE_SMS,
-            Manifest.permission.READ_SMS
-        )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            permissions.add(Manifest.permission.POST_NOTIFICATIONS)
-        }
-
-        if (hasPermissions(permissions)) {
+    private fun ensurePermissions() {
+        val required = PermissionHelper.requiredPermissions()
+        if (PermissionHelper.hasAll(this, required)) {
             startCashPointService()
         } else {
-            ActivityCompat.requestPermissions(this, permissions.toTypedArray(), SMS_PERMISSION_REQUEST_CODE)
+            permissionLauncher.launch(required)
         }
     }
-
-    private fun hasPermissions(permissions: List<String>): Boolean =
-        permissions.all { permission ->
-            ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
-        }
 
     private fun startCashPointService() {
         val intent = Intent(this, CashPointForegroundService::class.java)
@@ -74,9 +58,5 @@ class MainActivity : AppCompatActivity() {
     private fun setupNavigation() {
         val navController = binding.navHostFragment.findNavController()
         binding.bottomNavigation.setupWithNavController(navController)
-    }
-
-    companion object {
-        private const val SMS_PERMISSION_REQUEST_CODE = 100
     }
 }
