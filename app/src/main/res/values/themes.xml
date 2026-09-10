@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.Transactify" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/orange_money</item>
+        <item name="colorPrimaryDark">@color/orange_money</item>
+        <item name="colorAccent">@color/mvola_blue</item>
+        <item name="android:statusBarColor" tools:targetApi="l">@color/orange_money</item>
+    </style>
+</resources>

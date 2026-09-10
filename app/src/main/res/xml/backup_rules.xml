@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <exclude domain="database" path="transactify.db" />
+    <exclude domain="database" path="transactify.db-wal" />
+    <exclude domain="database" path="transactify.db-shm" />
+</full-backup-content>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/dashboardFragment">
+
+    <fragment
+        android:id="@+id/dashboardFragment"
+        android:name="com.tinah.transactify.ui.dashboard.DashboardFragment"
+        android:label="@string/nav_dashboard"
+        tools:layout="@layout/fragment_dashboard"
+        xmlns:tools="http://schemas.android.com/tools" />
+
+    <fragment
+        android:id="@+id/transactionsFragment"
+        android:name="com.tinah.transactify.ui.transactions.TransactionsFragment"
+        android:label="@string/nav_transactions" />
+
+    <fragment
+        android:id="@+id/clientsFragment"
+        android:name="com.tinah.transactify.ui.clients.ClientsFragment"
+        android:label="@string/nav_clients" />
+
+    <fragment
+        android:id="@+id/reportsFragment"
+        android:name="com.tinah.transactify.ui.reports.ReportsFragment"
+        android:label="@string/nav_reports" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.tinah.transactify.ui.settings.SettingsFragment"
+        android:label="@string/nav_settings" />
+
+</navigation>

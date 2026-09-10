@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Transactify</string>
+    <string name="notification_title">💰 Transactify Active</string>
+    <string name="notification_text">À l\'écoute des SMS</string>
+    <string name="dashboard_total_received">Total Reçu</string>
+    <string name="dashboard_total_sent">Total Envoyé</string>
+    <string name="dashboard_total_profit">Bénéfice Total</string>
+    <string name="dashboard_view_transactions">Voir les transactions</string>
+    <string name="dashboard_view_clients">Voir les clients</string>
+    <string name="nav_dashboard">Tableau de bord</string>
+    <string name="nav_transactions">Transactions</string>
+    <string name="nav_clients">Clients</string>
+    <string name="nav_reports">Rapports</string>
+    <string name="nav_settings">Paramètres</string>
+    <string name="placeholder_coming_soon">Bientôt disponible</string>
+</resources>
