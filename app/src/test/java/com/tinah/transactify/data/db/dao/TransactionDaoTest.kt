@@ -133,4 +133,93 @@ class TransactionDaoTest {
         assertEquals(2, dao.getTransactionCountInRange(1_000L, 9_000L).first())
         assertEquals(3, dao.getTransactionCountInRange(0L, 10_000L).first())
     }
+
+    @Test
+    fun `getTotalReceived et getTotalSent ne sommet que le sens correspondant`() = runTest {
+        dao.insertTransaction(tx(type = TransactionType.RECU.storageValue, amount = 10_000.0, timestamp = 1_000L))
+        dao.insertTransaction(tx(type = TransactionType.RECU.storageValue, amount = 5_000.0, timestamp = 2_000L))
+        dao.insertTransaction(tx(type = TransactionType.ENVOYE.storageValue, amount = 7_000.0, timestamp = 3_000L))
+
+        assertEquals(15_000.0, dao.getTotalReceived().first())
+        assertEquals(7_000.0, dao.getTotalSent().first())
+    }
+
+    @Test
+    fun `getTotalProfit somme le benefice de toutes les transactions`() = runTest {
+        dao.insertTransaction(tx(timestamp = 1_000L).copy(profitCalculated = 300.0))
+        dao.insertTransaction(tx(timestamp = 2_000L).copy(profitCalculated = 450.0))
+
+        assertEquals(750.0, dao.getTotalProfit().first())
+    }
+
+    @Test
+    fun `les totaux sont null sans transaction (pas zero)`() = runTest {
+        assertEquals(null, dao.getTotalReceived().first())
+        assertEquals(null, dao.getTotalSent().first())
+        assertEquals(null, dao.getTotalProfit().first())
+    }
+
+    @Test
+    fun `getFilteredTransactions filtre par operateur et periode`() = runTest {
+        dao.insertTransaction(tx(operator = "Orange Money", timestamp = 1_000L))
+        dao.insertTransaction(tx(operator = "M-Vola", timestamp = 2_000L))
+        dao.insertTransaction(tx(operator = "Orange Money", timestamp = 9_000L))
+
+        val orangeOnly = dao.getFilteredTransactions("Orange Money", 0L, Long.MAX_VALUE).first()
+        assertEquals(2, orangeOnly.size)
+
+        val everyone = dao.getFilteredTransactions(null, 0L, Long.MAX_VALUE).first()
+        assertEquals(3, everyone.size)
+
+        val orangeInWindow = dao.getFilteredTransactions("Orange Money", 0L, 5_000L).first()
+        assertEquals(1, orangeInWindow.size)
+    }
+
+    @Test
+    fun `getLatestTransactions limite et trie par date decroissante`() = runTest {
+        dao.insertTransaction(tx(timestamp = 1_000L))
+        dao.insertTransaction(tx(timestamp = 3_000L))
+        dao.insertTransaction(tx(timestamp = 2_000L))
+
+        val latest = dao.getLatestTransactions(2).first()
+
+        assertEquals(listOf(3_000L, 2_000L), latest.map { it.timestamp })
+    }
+
+    @Test
+    fun `getTransactionById renvoie null si absente`() = runTest {
+        assertEquals(null, dao.getTransactionById(999).first())
+    }
+
+    @Test
+    fun `getTransactionById renvoie la transaction demandee`() = runTest {
+        val id = dao.insertTransaction(tx())
+        assertEquals(id.toInt(), dao.getTransactionById(id.toInt()).first()?.id)
+    }
+
+    @Test
+    fun `getTransactionsByClient ne renvoie que les transactions de ce numero`() = runTest {
+        dao.insertTransaction(tx(phone = "+26132000001", timestamp = 1_000L))
+        dao.insertTransaction(tx(phone = "+26132000002", timestamp = 2_000L))
+
+        assertEquals(1, dao.getTransactionsByClient("+26132000001").first().size)
+    }
+
+    @Test
+    fun `updateTransaction et deleteTransaction modifient bien la ligne ciblee`() = runTest {
+        val id = dao.insertTransaction(tx())
+        val saved = dao.getTransactionById(id.toInt()).first()!!
+
+        dao.updateTransaction(saved.copy(profitCalculated = 999.0))
+        assertEquals(999.0, dao.getTransactionById(id.toInt()).first()?.profitCalculated)
+
+        dao.deleteTransaction(saved)
+        assertEquals(null, dao.getTransactionById(id.toInt()).first())
+    }
+
+    @Test
+    fun `insertTransactions insere plusieurs lignes en une fois`() = runTest {
+        dao.insertTransactions(listOf(tx(timestamp = 1_000L), tx(timestamp = 2_000L)))
+        assertEquals(2, dao.getAllTransactions().first().size)
+    }
 }
