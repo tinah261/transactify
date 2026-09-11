@@ -33,7 +33,7 @@ class AppContainer(context: Context) {
     val classifyClientUseCase: ClassifyClientUseCase by lazy { ClassifyClientUseCase() }
 
     val transactionRepository: TransactionRepository by lazy {
-        TransactionRepository(database.transactionDao(), database.clientDao())
+        TransactionRepository(database.transactionDao(), database.clientDao(), classifyClientUseCase)
     }
 
     val clientRepository: ClientRepository by lazy {

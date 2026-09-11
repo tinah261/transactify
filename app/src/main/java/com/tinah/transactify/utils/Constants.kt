@@ -17,6 +17,9 @@ object Constants {
     /** Nom unique du travail périodique de rattrapage. */
     const val SMS_CATCHUP_WORK_NAME = "sms_catchup"
 
+    /** Intervalle du rattrapage périodique (minimum imposé par WorkManager). */
+    const val SMS_CATCHUP_INTERVAL_MINUTES = 15L
+
     /**
      * Fenêtre de lecture rétroactive des SMS (ms). Utilisée comme filet de
      * sécurité quand aucun curseur `lastProcessedSmsTimestamp` n'est encore
