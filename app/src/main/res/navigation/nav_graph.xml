@@ -30,7 +30,22 @@
     <fragment
         android:id="@+id/clientsFragment"
         android:name="com.tinah.transactify.ui.clients.ClientsFragment"
-        android:label="@string/nav_clients" />
+        android:label="@string/nav_clients"
+        tools:layout="@layout/fragment_clients">
+        <action
+            android:id="@+id/action_clientsFragment_to_clientDetailFragment"
+            app:destination="@id/clientDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/clientDetailFragment"
+        android:name="com.tinah.transactify.ui.clients.ClientDetailFragment"
+        android:label="@string/nav_client_detail"
+        tools:layout="@layout/fragment_client_detail">
+        <action
+            android:id="@+id/action_clientDetailFragment_to_transactionDetailFragment"
+            app:destination="@id/transactionDetailFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/reportsFragment"

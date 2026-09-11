@@ -39,4 +39,23 @@
     <string name="transaction_detail_edit_profit">Corriger le bénéfice</string>
     <string name="transaction_detail_delete">Supprimer la transaction</string>
     <string name="transaction_detail_delete_confirm">Cette action est définitive. Les statistiques du client seront recalculées.</string>
+
+    <!-- Clients : liste -->
+    <string name="nav_client_detail">Détail client</string>
+    <string name="clients_search_hint">Rechercher un nom ou un numéro</string>
+    <string name="clients_empty_state">Aucun client trouvé</string>
+    <string name="client_last_interaction">Dernier échange le %1$s</string>
+    <string name="client_classification_vip">VIP</string>
+    <string name="client_classification_regular">Régulier</string>
+    <string name="client_classification_one_time">Ponctuel</string>
+
+    <!-- Clients : détail -->
+    <string name="client_detail_edit_name">Modifier le nom</string>
+    <string name="client_detail_transactions_title">Historique des transactions</string>
+    <string name="client_detail_no_transactions">Aucune transaction enregistrée pour ce client</string>
+
+    <plurals name="client_transaction_count">
+        <item quantity="one">%d transaction</item>
+        <item quantity="other">%d transactions</item>
+    </plurals>
 </resources>

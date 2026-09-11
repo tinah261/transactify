@@ -23,6 +23,13 @@ class ClientRepository(
     suspend fun getClientByPhone(phoneNumber: String): Client? =
         clientDao.getClientByPhone(phoneNumber)
 
+    fun observeClientByPhone(phoneNumber: String): Flow<Client?> =
+        clientDao.observeClientByPhone(phoneNumber)
+
+    /** [query] vide = tous les clients, triés par volume décroissant. */
+    fun searchClients(query: String): Flow<List<Client>> =
+        clientDao.searchClients(query.trim())
+
     suspend fun updateClient(client: Client) =
         clientDao.updateClient(client)
 }
