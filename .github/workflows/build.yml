@@ -36,6 +36,9 @@ jobs:
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest --stacktrace
 
+      - name: Generate coverage report
+        run: ./gradlew jacocoTestReport --stacktrace
+
       - name: Run Android Lint
         run: ./gradlew lintDebug --stacktrace
 
@@ -46,5 +49,6 @@ jobs:
           name: build-reports
           path: |
             app/build/reports/tests/
+            app/build/reports/jacoco/
             app/build/reports/lint-results-debug.html
           if-no-files-found: ignore

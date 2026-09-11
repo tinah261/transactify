@@ -85,4 +85,59 @@ class ClientDaoTest {
         val after = dao.observeClientByPhone("+26132000001").first()
         assertEquals("Rakoto", after?.name)
     }
+
+    @Test
+    fun `getClientByPhone renvoie null si absent`() = runTest {
+        assertEquals(null, dao.getClientByPhone("+26139999999"))
+    }
+
+    @Test
+    fun `getAllClients trie par derniere interaction decroissante`() = runTest {
+        dao.insertClient(client("+26132000001", "Rakoto", 0.0, 0.0).copy(lastInteraction = 1_000L))
+        dao.insertClient(client("+26132000002", "Rabe", 0.0, 0.0).copy(lastInteraction = 2_000L))
+
+        assertEquals(
+            listOf("+26132000002", "+26132000001"),
+            dao.getAllClients().first().map { it.phoneNumber },
+        )
+    }
+
+    @Test
+    fun `getClientsByClassification ne renvoie que la classification demandee`() = runTest {
+        dao.insertClient(client("+26132000001", "Rakoto", 0.0, 0.0).copy(classification = "VIP"))
+        dao.insertClient(client("+26132000002", "Rabe", 0.0, 0.0).copy(classification = "REGULAR"))
+
+        val vips = dao.getClientsByClassification("VIP").first()
+
+        assertEquals(listOf("+26132000001"), vips.map { it.phoneNumber })
+    }
+
+    @Test
+    fun `getTopClients limite et trie par nombre de transactions`() = runTest {
+        dao.insertClient(client("+26132000001", "Rakoto", 0.0, 0.0).copy(transactionCount = 5))
+        dao.insertClient(client("+26132000002", "Rabe", 0.0, 0.0).copy(transactionCount = 20))
+        dao.insertClient(client("+26132000003", "Be", 0.0, 0.0).copy(transactionCount = 1))
+
+        val top2 = dao.getTopClients(2).first()
+
+        assertEquals(listOf("+26132000002", "+26132000001"), top2.map { it.phoneNumber })
+    }
+
+    @Test
+    fun `getClientCount compte tous les clients`() = runTest {
+        dao.insertClient(client("+26132000001", "Rakoto", 0.0, 0.0))
+        dao.insertClient(client("+26132000002", "Rabe", 0.0, 0.0))
+
+        assertEquals(2, dao.getClientCount().first())
+    }
+
+    @Test
+    fun `deleteClient retire le client cible`() = runTest {
+        dao.insertClient(client("+26132000001", "Rakoto", 0.0, 0.0))
+        val saved = dao.getClientByPhone("+26132000001")!!
+
+        dao.deleteClient(saved)
+
+        assertEquals(null, dao.getClientByPhone("+26132000001"))
+    }
 }

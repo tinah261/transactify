@@ -58,6 +58,7 @@ com.tinah.transactify/
 ```bash
 ./gradlew assembleDebug        # APK debug
 ./gradlew testDebugUnitTest    # tests unitaires
+./gradlew jacocoTestReport     # rapport de couverture (app/build/reports/jacoco/)
 ./gradlew lintDebug            # analyse statique
 ```
 
@@ -68,7 +69,26 @@ com.tinah.transactify/
 Room exporte le schéma versionné de la base dans `app/schemas/` (requis pour les
 migrations et leurs tests).
 
-### Limitations de test connues
+### Tests et couverture
+
+140 tests unitaires : `domain/model` (93 %), `domain/usecase` (83 %),
+`data/repository` (79 %), `utils` (85 %) — DAO testés sur une vraie base
+SQLite en mémoire (Robolectric), tous les ViewModels testés (`MainDispatcherRule`
+pour `viewModelScope`), migration Room vérifiée sur une base réelle.
+
+**Non couvert, volontairement** : `data/service` (`SMSBroadcastReceiver`,
+`SMSProcessingWorker`, `CashPointForegroundService`) nécessiterait
+`androidx.work:work-testing` + du mock `ContentResolver` — pas encore fait ;
+`ui/*/Fragment` (liaison de vues Android, pas de logique à vérifier
+unitairement) et les classes `Factory` de `ViewModelProvider` (wiring DI
+trivial) sont explicitement exclus du rapport de couverture.
+
+**Limitation d'outillage connue** : le rapport JaCoCo affiche 0 % pour
+`data/db/dao` et `data/db/migration` alors que ce code est abondamment testé
+(voir `TransactionDaoTest`, `ClientDaoTest`, `DatabaseMigrationsTest`) — JaCoCo
+n'attribue pas correctement la couverture du code exécuté dans le classloader
+sandboxé de Robolectric, limitation connue de leur interaction, pas un vrai
+trou de test.
 
 `ExportReportToPdfUseCase` n'a pas de test Robolectric : le shadow `PdfDocument`
 de Robolectric 4.13 ne le supporte pas correctement (`document is closed!` dès

@@ -6,6 +6,7 @@ import com.tinah.transactify.domain.model.OperatorType
 import com.tinah.transactify.domain.model.TransactionType
 import com.tinah.transactify.domain.usecase.RecalculateProfitsUseCase
 import com.tinah.transactify.testutil.MainDispatcherRule
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -20,6 +21,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModelTest {
 
     @get:Rule

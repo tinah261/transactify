@@ -8,6 +8,7 @@ import com.tinah.transactify.domain.model.TransactionSummary
 import com.tinah.transactify.domain.usecase.GetDashboardSummaryUseCase
 import com.tinah.transactify.domain.usecase.GetReportDataUseCase
 import com.tinah.transactify.testutil.MainDispatcherRule
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
@@ -19,6 +20,7 @@ import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class DashboardViewModelTest {
 
     @get:Rule
