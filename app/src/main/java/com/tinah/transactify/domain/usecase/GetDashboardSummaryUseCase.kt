@@ -2,6 +2,7 @@ package com.tinah.transactify.domain.usecase
 
 import com.tinah.transactify.data.repository.TransactionRepository
 import com.tinah.transactify.domain.model.TransactionSummary
+import com.tinah.transactify.domain.model.toItemOrNull
 import com.tinah.transactify.utils.DateUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -9,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 
 /** Fournit les agrégats du tableau de bord sous forme d'un flux unique. */
 class GetDashboardSummaryUseCase(
@@ -27,9 +27,12 @@ class GetDashboardSummaryUseCase(
             Triple(received ?: 0.0, sent ?: 0.0, profit ?: 0.0)
         }.flatMapLatest { (received, sent, profit) ->
             val now = System.currentTimeMillis()
-            transactionRepository
-                .getTransactionCountInRange(DateUtils.startOfDay(now), DateUtils.endOfDay(now))
-                .map { countToday -> TransactionSummary(received, sent, profit, countToday) }
+            combine(
+                transactionRepository.getTransactionCountInRange(DateUtils.startOfDay(now), DateUtils.endOfDay(now)),
+                transactionRepository.getLatestTransactions(LATEST_TRANSACTIONS_LIMIT),
+            ) { countToday, latest ->
+                TransactionSummary(received, sent, profit, countToday, latest.mapNotNull { it.toItemOrNull() })
+            }
         }
 
     /**
@@ -46,5 +49,9 @@ class GetDashboardSummaryUseCase(
             val now = System.currentTimeMillis()
             delay((DateUtils.endOfDay(now) - now).coerceAtLeast(1_000L))
         }
+    }
+
+    private companion object {
+        const val LATEST_TRANSACTIONS_LIMIT = 5
     }
 }

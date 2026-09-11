@@ -90,6 +90,15 @@ class PreferencesManagerTest {
     }
 
     @Test
+    fun `resetSmsCursor peut faire reculer le curseur, contrairement a setLastProcessedSmsTimestamp`() = runBlocking {
+        manager.setLastProcessedSmsTimestamp(9_000L)
+
+        manager.resetSmsCursor(2_000L)
+
+        assertEquals(2_000L, manager.lastProcessedSmsTimestamp.first())
+    }
+
+    @Test
     fun `un taux hors bornes est rejete`() {
         assertThrows(IllegalArgumentException::class.java) {
             runBlocking { manager.setRate(OperatorType.ORANGE_MONEY, TransactionType.RECU, 1.5) }

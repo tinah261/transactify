@@ -9,7 +9,11 @@
         android:id="@+id/dashboardFragment"
         android:name="com.tinah.transactify.ui.dashboard.DashboardFragment"
         android:label="@string/nav_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        tools:layout="@layout/fragment_dashboard">
+        <action
+            android:id="@+id/action_dashboardFragment_to_transactionDetailFragment"
+            app:destination="@id/transactionDetailFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/transactionsFragment"
@@ -50,11 +54,13 @@
     <fragment
         android:id="@+id/reportsFragment"
         android:name="com.tinah.transactify.ui.reports.ReportsFragment"
-        android:label="@string/nav_reports" />
+        android:label="@string/nav_reports"
+        tools:layout="@layout/fragment_reports" />
 
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.tinah.transactify.ui.settings.SettingsFragment"
-        android:label="@string/nav_settings" />
+        android:label="@string/nav_settings"
+        tools:layout="@layout/fragment_settings" />
 
 </navigation>

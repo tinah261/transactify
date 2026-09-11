@@ -8,6 +8,15 @@
     <string name="dashboard_total_profit">Bénéfice Total</string>
     <string name="dashboard_view_transactions">Voir les transactions</string>
     <string name="dashboard_view_clients">Voir les clients</string>
+    <string name="dashboard_operator_breakdown">Répartition par opérateur</string>
+    <string name="dashboard_latest_transactions">Dernières transactions</string>
+    <string name="dashboard_no_transactions">Aucune transaction pour le moment</string>
+    <string name="dashboard_operator_line">%1$s · %2$d tx</string>
+
+    <plurals name="dashboard_today_count">
+        <item quantity="one">%d transaction aujourd\'hui</item>
+        <item quantity="other">%d transactions aujourd\'hui</item>
+    </plurals>
     <string name="nav_dashboard">Tableau de bord</string>
     <string name="nav_transactions">Transactions</string>
     <string name="nav_clients">Clients</string>
@@ -57,5 +66,39 @@
     <plurals name="client_transaction_count">
         <item quantity="one">%d transaction</item>
         <item quantity="other">%d transactions</item>
+    </plurals>
+
+    <!-- Rapports -->
+    <string name="report_period_today">Aujourd\'hui</string>
+    <string name="report_period_7_days">7 jours</string>
+    <string name="report_period_30_days">30 jours</string>
+    <string name="report_period_all_time">Tout</string>
+    <string name="report_no_data">Aucune transaction sur cette période</string>
+    <string name="report_chart_profit_by_operator">Bénéfice par opérateur</string>
+    <string name="report_chart_volume_share">Répartition du volume</string>
+    <string name="report_export_pdf">Exporter en PDF</string>
+    <string name="report_export_excel">Exporter en Excel</string>
+    <string name="report_export_failed">Échec de l\'export</string>
+    <string name="report_share_title">Partager le rapport</string>
+
+    <!-- Paramètres -->
+    <string name="settings_rates_title">Taux de commission</string>
+    <string name="settings_rates_subtitle">En pourcentage du montant de la transaction</string>
+    <string name="settings_rate_recu">Reçu</string>
+    <string name="settings_rate_envoye">Envoyé</string>
+    <string name="settings_save_rates">Enregistrer les taux</string>
+    <string name="settings_rates_saved">Taux enregistrés</string>
+    <string name="settings_rates_saved_with_errors">Taux enregistrés (certaines valeurs invalides ignorées)</string>
+    <string name="settings_service_toggle">Service actif (écoute des SMS en continu)</string>
+    <string name="settings_recalculate_profits">Recalculer les bénéfices</string>
+    <string name="settings_recalculate_confirm">Recalcule le bénéfice de toutes les transactions avec les taux actuels. Les bonus déjà rattachés ne sont pas affectés.</string>
+    <string name="settings_rescan_sms">Re-scanner les SMS des dernières 24h</string>
+    <string name="settings_rescan_confirm">Relit les SMS des dernières 24 heures au cas où une transaction aurait été manquée.</string>
+    <string name="settings_rescan_started">Analyse des SMS relancée</string>
+    <string name="settings_about">Transactify v%1$s</string>
+
+    <plurals name="settings_recalculate_result">
+        <item quantity="one">%d transaction mise à jour</item>
+        <item quantity="other">%d transactions mises à jour</item>
     </plurals>
 </resources>

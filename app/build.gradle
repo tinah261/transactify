@@ -119,8 +119,8 @@ dependencies {
     // Charts
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 
-    // PDF Export
-    implementation 'com.itextpdf:itextpdf:5.5.13'
+    // PDF Export : android.graphics.pdf.PdfDocument (plateforme, pas de dépendance --
+    // itextpdf retiré : CVE connues + licence AGPL inadaptée à une app commerciale)
 
     // Excel Export
     implementation 'org.apache.poi:poi-ooxml:5.2.2'

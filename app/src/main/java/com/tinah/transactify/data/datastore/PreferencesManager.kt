@@ -71,6 +71,16 @@ class PreferencesManager(
         }
     }
 
+    /**
+     * Recule volontairement le curseur (contrairement à [setLastProcessedSmsTimestamp],
+     * qui ne peut qu'avancer) — utilisé par l'action « re-scanner l'historique
+     * SMS » des Paramètres, pour forcer un nouveau passage sur une fenêtre
+     * passée.
+     */
+    suspend fun resetSmsCursor(toTimestampMillis: Long) {
+        dataStore.edit { it[LAST_SMS_TS] = toTimestampMillis }
+    }
+
     /** Le service de premier plan « à l'écoute » est-il activé (défaut : oui). */
     val foregroundServiceEnabled: Flow<Boolean> =
         dataStore.data.map { it[FOREGROUND_SERVICE_ENABLED] ?: true }
