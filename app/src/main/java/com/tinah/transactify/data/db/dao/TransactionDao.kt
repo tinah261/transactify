@@ -12,10 +12,15 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TransactionDao {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    /**
+     * `IGNORE` plutôt que `REPLACE` : en cas de conflit sur l'index unique
+     * (operator, timestamp, amount, transaction_type), on ne touche pas à la ligne
+     * existante (qui peut déjà être liée à un bonus) et on renvoie `-1`.
+     */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertTransaction(transaction: Transaction): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertTransactions(transactions: List<Transaction>)
 
     @Update
@@ -45,11 +50,31 @@ interface TransactionDao {
     @Query("SELECT SUM(profit_calculated) FROM transactions")
     fun getTotalProfit(): Flow<Double?>
 
-    @Query("SELECT COUNT(*) FROM transactions WHERE DATE(timestamp / 1000, 'unixepoch') = DATE('now')")
-    fun getTransactionCountToday(): Flow<Int>
+    /**
+     * Compte les transactions dans `[startInclusive, endExclusive[`. Les bornes
+     * doivent être calculées côté Kotlin (voir [com.tinah.transactify.utils.DateUtils])
+     * dans le fuseau horaire de l'appareil — `DATE('now')` de SQLite raisonne en
+     * UTC et décale la journée pour Madagascar (UTC+3).
+     */
+    @Query("SELECT COUNT(*) FROM transactions WHERE timestamp >= :startInclusive AND timestamp < :endExclusive")
+    fun getTransactionCountInRange(startInclusive: Long, endExclusive: Long): Flow<Int>
 
     @Query("SELECT * FROM transactions ORDER BY timestamp DESC LIMIT :limit")
     fun getLatestTransactions(limit: Int = 50): Flow<List<Transaction>>
+
+    /** Somme des montants d'un client pour un sens de transaction donné. */
+    @Query(
+        """
+        SELECT COALESCE(SUM(amount), 0)
+        FROM transactions
+        WHERE phone_number = :phoneNumber AND transaction_type = :type
+        """
+    )
+    suspend fun sumAmountForClientByType(phoneNumber: String, type: String): Double
+
+    /** Nombre total de transactions d'un client, tous sens confondus. */
+    @Query("SELECT COUNT(*) FROM transactions WHERE phone_number = :phoneNumber")
+    suspend fun countForClient(phoneNumber: String): Int
 
     @Query(
         """

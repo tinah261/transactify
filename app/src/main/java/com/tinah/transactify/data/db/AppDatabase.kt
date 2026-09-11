@@ -12,7 +12,7 @@ import com.tinah.transactify.utils.Constants
 
 @Database(
     entities = [Transaction::class, Client::class],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {

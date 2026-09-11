@@ -73,6 +73,11 @@ class ProcessSmsUseCase(
         )
 
         val id = transactionRepository.insertTransaction(transaction)
+        if (id == -1L) {
+            // Filet de sécurité : l'index unique a rejeté un doublon que le
+            // contrôle applicatif ci-dessus n'avait pas détecté (course entre workers).
+            return SmsProcessingOutcome.Duplicate
+        }
         Timber.d("Transaction #%d enregistrée (bénéfice %.0f Ar)", id, profit)
 
         if (parsed.isBonus) {

@@ -4,12 +4,15 @@ import com.tinah.transactify.data.db.dao.ClientDao
 import com.tinah.transactify.data.db.dao.TransactionDao
 import com.tinah.transactify.data.db.entity.Client
 import com.tinah.transactify.data.db.entity.Transaction
+import com.tinah.transactify.domain.model.TransactionType
+import com.tinah.transactify.domain.usecase.ClassifyClientUseCase
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
+import timber.log.Timber
 
 class TransactionRepository(
     private val transactionDao: TransactionDao,
-    private val clientDao: ClientDao
+    private val clientDao: ClientDao,
+    private val classifyClient: ClassifyClientUseCase,
 ) {
 
     fun getAllTransactions(): Flow<List<Transaction>> =
@@ -33,9 +36,21 @@ class TransactionRepository(
     fun getLatestTransactions(limit: Int = 50): Flow<List<Transaction>> =
         transactionDao.getLatestTransactions(limit)
 
-    /** Insère une transaction, met à jour les stats du client et renvoie l'id généré. */
+    /** Nombre de transactions dans `[startInclusive, endExclusive[` (bornes déjà en fuseau local). */
+    fun getTransactionCountInRange(startInclusive: Long, endExclusive: Long): Flow<Int> =
+        transactionDao.getTransactionCountInRange(startInclusive, endExclusive)
+
+    /**
+     * Insère une transaction, met à jour les stats du client et renvoie l'id
+     * généré, ou `-1` si la transaction existait déjà (index unique) — dans ce
+     * cas les stats du client ne sont pas retouchées.
+     */
     suspend fun insertTransaction(transaction: Transaction): Long {
         val id = transactionDao.insertTransaction(transaction)
+        if (id == -1L) {
+            Timber.d("Insertion ignorée (doublon déjà en base) : %s", transaction)
+            return -1L
+        }
         updateClientStats(transaction.phoneNumber)
         return id
     }
@@ -59,33 +74,40 @@ class TransactionRepository(
         transactionDao.deleteTransaction(transaction)
     }
 
+    /**
+     * Recalcule les agrégats du client en base (SQL, pas en mémoire) : le
+     * bénéfice/bonus n'entre pas dans `totalReceived` — c'est une commission du
+     * cash point, pas un montant reçu du client.
+     */
     private suspend fun updateClientStats(phoneNumber: String) {
-        val client = clientDao.getClientByPhone(phoneNumber) ?: run {
-            clientDao.insertClient(Client(phoneNumber = phoneNumber))
-            null
-        }
+        val totalReceived = transactionDao.sumAmountForClientByType(phoneNumber, TransactionType.RECU.storageValue)
+        val totalSent = transactionDao.sumAmountForClientByType(phoneNumber, TransactionType.ENVOYE.storageValue)
+        val transactionCount = transactionDao.countForClient(phoneNumber)
+        val classification = classifyClient(transactionCount, totalReceived + totalSent)
+        val now = System.currentTimeMillis()
 
-        val transactionsForClient = transactionDao
-            .getTransactionsByClient(phoneNumber)
-            .first()
-
-        val totalReceived = transactionsForClient
-            .filter { it.transactionType == "REÇU" }
-            .sumOf { it.amount + it.bonusAmount }
-
-        val totalSent = transactionsForClient
-            .filter { it.transactionType == "ENVOYÉ" }
-            .sumOf { it.amount }
-
-        val current = client ?: clientDao.getClientByPhone(phoneNumber) ?: return
-
-        clientDao.updateClient(
-            current.copy(
-                totalReceived = totalReceived,
-                totalSent = totalSent,
-                transactionCount = transactionsForClient.size,
-                lastInteraction = System.currentTimeMillis()
+        when (val existing = clientDao.getClientByPhone(phoneNumber)) {
+            null -> clientDao.insertClient(
+                Client(
+                    phoneNumber = phoneNumber,
+                    totalReceived = totalReceived,
+                    totalSent = totalSent,
+                    transactionCount = transactionCount,
+                    lastInteraction = now,
+                    classification = classification.name,
+                ),
             )
-        )
+
+            else -> clientDao.updateClient(
+                existing.copy(
+                    totalReceived = totalReceived,
+                    totalSent = totalSent,
+                    transactionCount = transactionCount,
+                    lastInteraction = now,
+                    classification = classification.name,
+                    updatedAt = now,
+                ),
+            )
+        }
     }
 }

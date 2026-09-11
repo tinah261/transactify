@@ -2,9 +2,23 @@ package com.tinah.transactify.data.db.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "transactions")
+/**
+ * L'index unique sur (operator, timestamp, amount, transaction_type) empêche le
+ * retraitement d'un même SMS de créer un doublon en base — filet de sécurité en
+ * plus du contrôle applicatif de [com.tinah.transactify.domain.usecase.ProcessSmsUseCase].
+ */
+@Entity(
+    tableName = "transactions",
+    indices = [
+        Index(
+            value = ["operator", "timestamp", "amount", "transaction_type"],
+            unique = true,
+        ),
+    ],
+)
 data class Transaction(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,

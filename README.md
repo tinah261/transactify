@@ -41,7 +41,7 @@ com.tinah.transactify/
 - `SMSParser` pour Orange Money / Airtel Money / M-Vola (montant, numéro, type, référence, bonus)
 - `BonusMatchingService` : rattache les SMS bonus à la transaction mère et calcule le bénéfice
 - Dashboard (total reçu / envoyé / bénéfice) avec `Flow`/`StateFlow`
-- Persistance 24/7 : `CashPointForegroundService` (notification, `START_STICKY`, relance à `onDestroy`) + `BootReceiver`
+- Persistance 24/7 : `CashPointForegroundService` (notification, `START_STICKY`, type `dataSync`) + `BootReceiver` + rattrapage périodique WorkManager
 - Tests unitaires pour `SMSParser` et `BonusMatchingService`
 
 Les fragments Transactions / Clients / Rapports / Paramètres sont des
@@ -67,4 +67,4 @@ migrations et leurs tests).
 ## Permissions requises
 
 `RECEIVE_SMS`, `READ_SMS`, `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED`,
-`INTERNET`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_PHONE_CALL`.
+`INTERNET`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_DATA_SYNC`.

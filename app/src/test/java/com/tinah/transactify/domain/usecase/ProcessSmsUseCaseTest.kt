@@ -60,6 +60,17 @@ class ProcessSmsUseCaseTest {
     }
 
     @Test
+    fun `un id -1 (index unique) est traite comme un doublon`() = runTest {
+        whenever(repository.isDuplicate(any(), any(), any(), any())).thenReturn(false)
+        whenever(repository.insertTransaction(any())).thenReturn(-1L)
+
+        val outcome = useCase(RawSms(orangeSend, null, 5_000L))
+
+        assertEquals(SmsProcessingOutcome.Duplicate, outcome)
+        verify(bonusMatchingService, never()).matchBonusToTransaction(any())
+    }
+
+    @Test
     fun `rapproche le bonus apres insertion`() = runTest {
         whenever(repository.isDuplicate(any(), any(), any(), any())).thenReturn(false)
         whenever(repository.insertTransaction(any())).thenReturn(9L)

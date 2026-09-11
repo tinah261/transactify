@@ -5,11 +5,16 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.tinah.transactify.data.service.CashPointForegroundService
+import com.tinah.transactify.data.service.SmsWorkScheduler
 import com.tinah.transactify.databinding.ActivityMainBinding
+import com.tinah.transactify.di.appContainer
 import com.tinah.transactify.utils.PermissionHelper
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
@@ -21,7 +26,7 @@ class MainActivity : AppCompatActivity() {
     ) { results ->
         val smsGranted = PermissionHelper.SMS_PERMISSIONS.all { results[it] == true }
         if (smsGranted || PermissionHelper.hasSmsPermissions(this)) {
-            startCashPointService()
+            onSmsPermissionsGranted()
         } else {
             Timber.w("Permissions SMS refusées — la capture des transactions est désactivée")
         }
@@ -40,9 +45,20 @@ class MainActivity : AppCompatActivity() {
     private fun ensurePermissions() {
         val required = PermissionHelper.requiredPermissions()
         if (PermissionHelper.hasAll(this, required)) {
-            startCashPointService()
+            onSmsPermissionsGranted()
         } else {
             permissionLauncher.launch(required)
+        }
+    }
+
+    /** Permissions SMS acquises : démarre le service (si activé) et le rattrapage périodique. */
+    private fun onSmsPermissionsGranted() {
+        SmsWorkScheduler.scheduleCatchUp(this)
+
+        lifecycleScope.launch {
+            if (appContainer.preferencesManager.foregroundServiceEnabled.first()) {
+                startCashPointService()
+            }
         }
     }
 
