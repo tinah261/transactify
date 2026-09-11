@@ -28,4 +28,20 @@ class ClassifyClientUseCaseTest {
     fun `gros volume donne VIP meme avec peu de transactions`() {
         assertEquals(ClientClassification.VIP, useCase(transactionCount = 3, totalVolume = 1_000_000.0))
     }
+
+    @Test
+    fun `juste apres le seuil ponctuel devient regulier`() {
+        assertEquals(ClientClassification.REGULAR, useCase(transactionCount = 2, totalVolume = 5_000.0))
+    }
+
+    @Test
+    fun `juste avant le seuil VIP reste regulier`() {
+        assertEquals(ClientClassification.REGULAR, useCase(transactionCount = 19, totalVolume = 10_000.0))
+    }
+
+    @Test
+    fun `le seuil de volume VIP est inclusif`() {
+        assertEquals(ClientClassification.REGULAR, useCase(transactionCount = 5, totalVolume = 999_999.99))
+        assertEquals(ClientClassification.VIP, useCase(transactionCount = 5, totalVolume = 1_000_000.0))
+    }
 }

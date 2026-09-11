@@ -27,6 +27,23 @@ interface ClientDao {
     @Query("SELECT * FROM clients WHERE phone_number = :phoneNumber")
     suspend fun getClientByPhone(phoneNumber: String): Client?
 
+    /** Variante réactive de [getClientByPhone], pour l'écran de détail client. */
+    @Query("SELECT * FROM clients WHERE phone_number = :phoneNumber")
+    fun observeClientByPhone(phoneNumber: String): Flow<Client?>
+
+    /**
+     * Liste triée par volume (reçu + envoyé) décroissant, filtrée par nom ou
+     * numéro si [query] est non vide.
+     */
+    @Query(
+        """
+        SELECT * FROM clients
+        WHERE (:query = '' OR name LIKE '%' || :query || '%' OR phone_number LIKE '%' || :query || '%')
+        ORDER BY (total_received + total_sent) DESC
+        """
+    )
+    fun searchClients(query: String): Flow<List<Client>>
+
     @Query("SELECT * FROM clients WHERE classification = :classification ORDER BY transaction_count DESC")
     fun getClientsByClassification(classification: String): Flow<List<Client>>
 
