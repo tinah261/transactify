@@ -7,10 +7,11 @@ Madagascar.
 ## Stack
 
 - **Langage** : Kotlin
-- **Architecture** : MVVM + Clean Architecture (`data` / `domain` / `ui`)
-- **Persistance** : Room (SQLite)
+- **Architecture** : MVVM + Clean Architecture (`data` / `domain` / `ui`), DI manuelle (`AppContainer`)
+- **Persistance** : Room (SQLite) + DataStore Preferences (réglages)
 - **Async** : Coroutines + Flow, WorkManager pour le traitement des SMS en tâche de fond
-- **UI** : Material Components, Navigation Component, ViewBinding
+- **UI** : Material Components, Navigation Component, ViewBinding, MPAndroidChart
+- **Export** : PDF (`android.graphics.pdf.PdfDocument`), Excel (Apache POI)
 - **Min SDK** : 26 (Android 8.0) — **Target SDK** : 35 (Android 15)
 
 ## Structure du projet
@@ -18,36 +19,39 @@ Madagascar.
 ```
 com.tinah.transactify/
 ├── data/
-│   ├── db/            # Entités Room, DAOs, AppDatabase
-│   ├── repository/     # TransactionRepository, ClientRepository
-│   └── service/         # SMSBroadcastReceiver, SMSProcessingWorker,
-│                          CashPointForegroundService, BootReceiver
+│   ├── db/              # Entités Room, DAOs, AppDatabase, migrations
+│   ├── datastore/        # PreferencesManager (taux, curseur SMS, service)
+│   ├── repository/       # TransactionRepository, ClientRepository
+│   └── service/          # SMSBroadcastReceiver, SMSProcessingWorker,
+│                            CashPointForegroundService, BootReceiver, SmsWorkScheduler
 ├── domain/
-│   └── model/, usecase/ # réservé aux phases suivantes
+│   ├── model/            # OperatorType, TransactionType, ClientClassification,
+│   │                        CommissionRates, TransactionItem, ClientItem,
+│   │                        TransactionSummary, ReportPeriod, ReportData
+│   └── usecase/          # Un use case par action métier (voir ci-dessous)
 ├── ui/
-│   ├── dashboard/       # Tableau de bord (implémenté)
-│   ├── transactions/    # Placeholder de navigation (Phase 7)
-│   ├── clients/         # Placeholder de navigation (Phase 7)
-│   ├── reports/         # Placeholder de navigation (Phase 7)
-│   └── settings/        # Placeholder de navigation (Phase 7)
-└── utils/               # SMSParser, BonusMatchingService
+│   ├── dashboard/         # Tableau de bord
+│   ├── transactions/      # Liste filtrable + détail
+│   ├── clients/           # Répertoire + détail
+│   ├── reports/           # Synthèse, graphiques, export PDF/Excel
+│   └── settings/          # Taux de commission, service, maintenance
+├── di/                   # AppContainer (ServiceLocator)
+└── utils/                # SMSParser, BonusMatchingService, DateUtils, MoneyFormatter, Constants
 ```
 
-## Ce qui est implémenté (Phases 1-6 du prompt de développement)
+## Fonctionnalités implémentées
 
-- Squelette Gradle complet, dépendances, structure de packages, manifest, CI GitHub Actions
-- Entités et DAOs Room pour `Transaction` et `Client`, `AppDatabase`, repositories
-- Capture SMS en temps réel (`SMSBroadcastReceiver` → `WorkManager` → `SMSProcessingWorker`)
-- `SMSParser` pour Orange Money / Airtel Money / M-Vola (montant, numéro, type, référence, bonus)
-- `BonusMatchingService` : rattache les SMS bonus à la transaction mère et calcule le bénéfice
-- Dashboard (total reçu / envoyé / bénéfice) avec `Flow`/`StateFlow`
-- Persistance 24/7 : `CashPointForegroundService` (notification, `START_STICKY`, type `dataSync`) + `BootReceiver` + rattrapage périodique WorkManager
-- Tests unitaires pour `SMSParser` et `BonusMatchingService`
-
-Les fragments Transactions / Clients / Rapports / Paramètres sont des
-placeholders de navigation : le prompt fourni ne détaille leur UI (listes,
-export PDF/Excel, graphiques MPAndroidChart, taux de commission) que dans les
-phases suivantes non couvertes par ce prompt.
+- **Capture SMS temps réel** : `SMSBroadcastReceiver` → `WorkManager` → `SMSProcessingWorker`,
+  curseur persistant (pas de re-scan à chaque SMS), filet de rattrapage périodique (15 min)
+- **`SMSParser`** : Orange Money / Airtel Money / M-Vola (montant, numéro, sens, référence, bonus)
+- **Déduplication** : index unique en base + contrôle applicatif (opérateur, horodatage, montant, sens, numéro)
+- **`BonusMatchingService`** : rattache un SMS bonus à sa transaction mère, recalcule le bénéfice et les stats client
+- **Tableau de bord** : totaux, compteur du jour, répartition par opérateur, dernières transactions
+- **Transactions** : liste filtrable par opérateur, détail avec correction manuelle du bénéfice et suppression
+- **Clients** : répertoire trié par volume avec recherche, classification (VIP/Régulier/Ponctuel), détail avec historique et renommage
+- **Rapports** : périodes prédéfinies, graphiques (barres/camembert), export PDF et Excel partageables
+- **Paramètres** : taux de commission éditables, activation du service, recalcul des bénéfices, re-scan SMS
+- **Persistance 24/7** : `CashPointForegroundService` (type `dataSync`) + `BootReceiver`, activable/désactivable
 
 ## Build
 
@@ -63,6 +67,13 @@ phases suivantes non couvertes par ce prompt.
 
 Room exporte le schéma versionné de la base dans `app/schemas/` (requis pour les
 migrations et leurs tests).
+
+### Limitations de test connues
+
+`ExportReportToPdfUseCase` n'a pas de test Robolectric : le shadow `PdfDocument`
+de Robolectric 4.13 ne le supporte pas correctement (`document is closed!` dès
+`startPage()`). Ce n'est pas un bug du code — API Android standard, à vérifier
+manuellement sur appareil/émulateur.
 
 ## Permissions requises
 
