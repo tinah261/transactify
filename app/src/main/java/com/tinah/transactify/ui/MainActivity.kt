@@ -6,7 +6,7 @@ import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.tinah.transactify.data.service.CashPointForegroundService
 import com.tinah.transactify.data.service.SmsWorkScheduler
@@ -72,7 +72,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupNavigation() {
-        val navController = binding.navHostFragment.findNavController()
-        binding.bottomNavigation.setupWithNavController(navController)
+        // View.findNavController() dépend d'un tag posé par le NavHostFragment sur
+        // sa vue ; sur certains appareils/skins (constaté avec un skin Transsion
+        // HiOS/XOS), ce tag n'est pas garanti disponible de façon synchrone ici et
+        // l'appel lève IllegalStateException("... does not have a NavController set").
+        // Passer par le FragmentManager est la façon fiable de récupérer le
+        // NavHostFragment : sa création via commitNow() est déjà terminée à ce stade.
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(binding.navHostFragment.id) as NavHostFragment
+        binding.bottomNavigation.setupWithNavController(navHostFragment.navController)
     }
 }
