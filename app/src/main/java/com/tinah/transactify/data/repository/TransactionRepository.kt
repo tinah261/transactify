@@ -51,21 +51,30 @@ class TransactionRepository(
             Timber.d("Insertion ignorée (doublon déjà en base) : %s", transaction)
             return -1L
         }
-        updateClientStats(transaction.phoneNumber)
+        refreshClientStats(transaction.phoneNumber)
         return id
     }
 
     /**
-     * Vrai si une transaction identique (même opérateur, horodatage, montant et
-     * sens) existe déjà — protection contre le retraitement d'un même SMS.
+     * Vrai si une transaction identique (même opérateur, horodatage, montant,
+     * sens et numéro de client) existe déjà — protection contre le retraitement
+     * d'un même SMS.
      */
     suspend fun isDuplicate(
         operator: String,
         timestamp: Long,
         amount: Double,
         type: String,
-    ): Boolean = transactionDao.countMatching(operator, timestamp, amount, type) > 0
+        phoneNumber: String,
+    ): Boolean = transactionDao.countMatching(operator, timestamp, amount, type, phoneNumber) > 0
 
+    /**
+     * Met à jour une transaction existante. **N'appelle pas [refreshClientStats]
+     * automatiquement** : si la modification touche un montant/sens qui entre
+     * dans les agrégats, l'appelant doit rafraîchir explicitement (voir
+     * [com.tinah.transactify.utils.BonusMatchingService], qui recalcule après
+     * fusion d'un bonus).
+     */
     suspend fun updateTransaction(transaction: Transaction) {
         transactionDao.updateTransaction(transaction)
     }
@@ -77,9 +86,12 @@ class TransactionRepository(
     /**
      * Recalcule les agrégats du client en base (SQL, pas en mémoire) : le
      * bénéfice/bonus n'entre pas dans `totalReceived` — c'est une commission du
-     * cash point, pas un montant reçu du client.
+     * cash point, pas un montant reçu du client. Public : [insertTransaction]
+     * l'appelle automatiquement, mais [com.tinah.transactify.utils.BonusMatchingService]
+     * doit aussi l'appeler après avoir fusionné un bonus dans sa transaction
+     * mère (sinon les stats du client restent périmées).
      */
-    private suspend fun updateClientStats(phoneNumber: String) {
+    suspend fun refreshClientStats(phoneNumber: String) {
         val totalReceived = transactionDao.sumAmountForClientByType(phoneNumber, TransactionType.RECU.storageValue)
         val totalSent = transactionDao.sumAmountForClientByType(phoneNumber, TransactionType.ENVOYE.storageValue)
         val transactionCount = transactionDao.countForClient(phoneNumber)

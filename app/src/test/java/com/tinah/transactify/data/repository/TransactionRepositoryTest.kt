@@ -88,9 +88,25 @@ class TransactionRepositoryTest {
     }
 
     @Test
-    fun `isDuplicate delegue au DAO`() = runTest {
-        whenever(transactionDao.countMatching(eq("Orange Money"), eq(1_000L), eq(10_000.0), eq("REÇU"))).thenReturn(1)
+    fun `isDuplicate delegue au DAO en incluant le numero de client`() = runTest {
+        whenever(
+            transactionDao.countMatching(eq("Orange Money"), eq(1_000L), eq(10_000.0), eq("REÇU"), eq(phone)),
+        ).thenReturn(1)
 
-        assertEquals(true, repository.isDuplicate("Orange Money", 1_000L, 10_000.0, "REÇU"))
+        assertEquals(true, repository.isDuplicate("Orange Money", 1_000L, 10_000.0, "REÇU", phone))
+    }
+
+    @Test
+    fun `refreshClientStats est appelable directement (utilise par BonusMatchingService)`() = runTest {
+        whenever(transactionDao.sumAmountForClientByType(phone, TransactionType.RECU.storageValue)).thenReturn(5_000.0)
+        whenever(transactionDao.sumAmountForClientByType(phone, TransactionType.ENVOYE.storageValue)).thenReturn(0.0)
+        whenever(transactionDao.countForClient(phone)).thenReturn(1)
+        whenever(clientDao.getClientByPhone(phone)).thenReturn(null)
+
+        repository.refreshClientStats(phone)
+
+        val captor = argumentCaptor<Client>()
+        verify(clientDao).insertClient(captor.capture())
+        assertEquals(5_000.0, captor.firstValue.totalReceived, 0.0)
     }
 }

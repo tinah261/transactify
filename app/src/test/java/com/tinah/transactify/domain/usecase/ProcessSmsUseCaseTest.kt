@@ -37,7 +37,7 @@ class ProcessSmsUseCaseTest {
 
     @Test
     fun `enregistre une transaction avec le benefice calcule`() = runTest {
-        whenever(repository.isDuplicate(any(), any(), any(), any())).thenReturn(false)
+        whenever(repository.isDuplicate(any(), any(), any(), any(), any())).thenReturn(false)
         whenever(repository.insertTransaction(any())).thenReturn(7L)
 
         val outcome = useCase(RawSms(orangeSend, "OrangeMoney", 5_000L))
@@ -51,7 +51,7 @@ class ProcessSmsUseCaseTest {
 
     @Test
     fun `saute les doublons`() = runTest {
-        whenever(repository.isDuplicate(any(), any(), any(), any())).thenReturn(true)
+        whenever(repository.isDuplicate(any(), any(), any(), any(), any())).thenReturn(true)
 
         val outcome = useCase(RawSms(orangeSend, null, 5_000L))
 
@@ -61,7 +61,7 @@ class ProcessSmsUseCaseTest {
 
     @Test
     fun `un id -1 (index unique) est traite comme un doublon`() = runTest {
-        whenever(repository.isDuplicate(any(), any(), any(), any())).thenReturn(false)
+        whenever(repository.isDuplicate(any(), any(), any(), any(), any())).thenReturn(false)
         whenever(repository.insertTransaction(any())).thenReturn(-1L)
 
         val outcome = useCase(RawSms(orangeSend, null, 5_000L))
@@ -72,7 +72,7 @@ class ProcessSmsUseCaseTest {
 
     @Test
     fun `rapproche le bonus apres insertion`() = runTest {
-        whenever(repository.isDuplicate(any(), any(), any(), any())).thenReturn(false)
+        whenever(repository.isDuplicate(any(), any(), any(), any(), any())).thenReturn(false)
         whenever(repository.insertTransaction(any())).thenReturn(9L)
         val bonusSms =
             "Orange Money: BONUS Vous avez recu 1 500 Ar de +261 32 12 34 56. Ref: R1."

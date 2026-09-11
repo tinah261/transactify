@@ -45,7 +45,7 @@ class AppContainer(context: Context) {
     }
 
     val bonusMatchingService: BonusMatchingService by lazy {
-        BonusMatchingService(database.transactionDao(), calculateProfitUseCase)
+        BonusMatchingService(transactionRepository, calculateProfitUseCase)
     }
 
     val processSmsUseCase: ProcessSmsUseCase by lazy {

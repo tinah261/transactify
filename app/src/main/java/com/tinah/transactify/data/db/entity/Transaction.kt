@@ -6,15 +6,19 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
- * L'index unique sur (operator, timestamp, amount, transaction_type) empêche le
- * retraitement d'un même SMS de créer un doublon en base — filet de sécurité en
- * plus du contrôle applicatif de [com.tinah.transactify.domain.usecase.ProcessSmsUseCase].
+ * L'index unique sur (operator, timestamp, amount, transaction_type, phone_number)
+ * empêche le retraitement d'un même SMS de créer un doublon en base — filet de
+ * sécurité en plus du contrôle applicatif de
+ * [com.tinah.transactify.domain.usecase.ProcessSmsUseCase]. `phone_number` est
+ * inclus pour éviter qu'une collision fortuite entre deux clients différents
+ * (même opérateur/montant/sens à la même milliseconde) ne fasse ignorer à tort
+ * la transaction du second client.
  */
 @Entity(
     tableName = "transactions",
     indices = [
         Index(
-            value = ["operator", "timestamp", "amount", "transaction_type"],
+            value = ["operator", "timestamp", "amount", "transaction_type", "phone_number"],
             unique = true,
         ),
     ],

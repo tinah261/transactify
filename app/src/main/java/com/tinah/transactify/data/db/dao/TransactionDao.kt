@@ -14,8 +14,9 @@ interface TransactionDao {
 
     /**
      * `IGNORE` plutôt que `REPLACE` : en cas de conflit sur l'index unique
-     * (operator, timestamp, amount, transaction_type), on ne touche pas à la ligne
-     * existante (qui peut déjà être liée à un bonus) et on renvoie `-1`.
+     * (operator, timestamp, amount, transaction_type, phone_number), on ne
+     * touche pas à la ligne existante (qui peut déjà être liée à un bonus) et on
+     * renvoie `-1`.
      */
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertTransaction(transaction: Transaction): Long
@@ -83,6 +84,7 @@ interface TransactionDao {
           AND timestamp = :timestamp
           AND amount = :amount
           AND transaction_type = :type
+          AND phone_number = :phoneNumber
         """
     )
     suspend fun countMatching(
@@ -90,6 +92,7 @@ interface TransactionDao {
         timestamp: Long,
         amount: Double,
         type: String,
+        phoneNumber: String,
     ): Int
 
     @Query("DELETE FROM transactions WHERE timestamp < :beforeTime")

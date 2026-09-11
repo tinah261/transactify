@@ -35,10 +35,14 @@ class SMSProcessingWorker(
             var processed = 0
             var latestTimestamp = cursor
 
+            // >= et non > : un SMS distinct partageant exactement l'horodatage
+            // (ms) du curseur ne doit pas être exclu à jamais. Le SMS qui a fixé
+            // le curseur est donc relu une fois de plus, mais isDuplicate() /
+            // l'index unique l'ignorent proprement (voir ProcessSmsUseCase).
             val smsCursor = applicationContext.contentResolver.query(
                 Telephony.Sms.CONTENT_URI,
                 arrayOf(Telephony.Sms.BODY, Telephony.Sms.ADDRESS, Telephony.Sms.DATE),
-                "${Telephony.Sms.DATE} > ?",
+                "${Telephony.Sms.DATE} >= ?",
                 arrayOf(since.toString()),
                 "${Telephony.Sms.DATE} ASC",
             )

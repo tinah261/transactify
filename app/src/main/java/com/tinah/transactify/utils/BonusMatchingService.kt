@@ -1,7 +1,7 @@
 package com.tinah.transactify.utils
 
-import com.tinah.transactify.data.db.dao.TransactionDao
 import com.tinah.transactify.data.db.entity.Transaction
+import com.tinah.transactify.data.repository.TransactionRepository
 import com.tinah.transactify.domain.model.TransactionType
 import com.tinah.transactify.domain.usecase.CalculateProfitUseCase
 import kotlinx.coroutines.flow.first
@@ -13,14 +13,14 @@ import timber.log.Timber
  * SMS orphelin est supprimé.
  */
 class BonusMatchingService(
-    private val transactionDao: TransactionDao,
+    private val transactionRepository: TransactionRepository,
     private val calculateProfit: CalculateProfitUseCase,
 ) {
 
     suspend fun matchBonusToTransaction(bonusTransaction: Transaction) {
         if (bonusTransaction.bonusLinked) return
 
-        val candidates = transactionDao
+        val candidates = transactionRepository
             .getTransactionsByDateRange(
                 bonusTransaction.timestamp - Constants.BONUS_MATCH_WINDOW_MS,
                 bonusTransaction.timestamp,
@@ -45,14 +45,23 @@ class BonusMatchingService(
             typeStorageValue = parent.transactionType,
         )
 
-        transactionDao.updateTransaction(
+        transactionRepository.updateTransaction(
             parent.copy(
                 bonusAmount = bonusTransaction.amount,
                 bonusLinked = true,
                 profitCalculated = baseProfit + bonusTransaction.amount,
             ),
         )
-        transactionDao.deleteTransaction(bonusTransaction)
+        transactionRepository.deleteTransaction(bonusTransaction)
+
+        // La fusion + suppression ci-dessus laisse les stats du client périmées
+        // (elles avaient été calculées à l'insertion du bonus, avant fusion) :
+        // on les recalcule pour le(s) numéro(s) concerné(s).
+        transactionRepository.refreshClientStats(parent.phoneNumber)
+        if (bonusTransaction.phoneNumber != parent.phoneNumber) {
+            transactionRepository.refreshClientStats(bonusTransaction.phoneNumber)
+        }
+
         Timber.d("Bonus #%d rattaché à la transaction #%d", bonusTransaction.id, parent.id)
     }
 }

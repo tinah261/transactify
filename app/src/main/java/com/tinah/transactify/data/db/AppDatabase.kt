@@ -8,6 +8,7 @@ import com.tinah.transactify.data.db.dao.ClientDao
 import com.tinah.transactify.data.db.dao.TransactionDao
 import com.tinah.transactify.data.db.entity.Client
 import com.tinah.transactify.data.db.entity.Transaction
+import com.tinah.transactify.data.db.migration.ALL_MIGRATIONS
 import com.tinah.transactify.utils.Constants
 
 @Database(
@@ -31,6 +32,9 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     Constants.DATABASE_NAME
                 )
+                    .addMigrations(*ALL_MIGRATIONS)
+                    // Filet de sécurité pour tout saut de version non couvert par une
+                    // migration explicite (ne devrait pas arriver en pratique).
                     .fallbackToDestructiveMigration()
                     .build()
                     .also { instance = it }

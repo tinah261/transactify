@@ -48,6 +48,7 @@ class ProcessSmsUseCase(
             timestamp = raw.timestamp,
             amount = parsed.amount,
             type = parsed.type.storageValue,
+            phoneNumber = parsed.phoneNumber,
         )
         if (isDuplicate) {
             Timber.d("SMS déjà traité : %s %.0f Ar", parsed.operator.storageValue, parsed.amount)

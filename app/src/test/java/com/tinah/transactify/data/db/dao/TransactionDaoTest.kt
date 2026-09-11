@@ -78,6 +78,30 @@ class TransactionDaoTest {
     }
 
     @Test
+    fun `deux clients differents avec le meme operateur-montant-horodatage ne sont pas des doublons`() = runTest {
+        val first = dao.insertTransaction(tx(phone = "+26132000001", timestamp = 1_000L))
+        val second = dao.insertTransaction(tx(phone = "+26132000002", timestamp = 1_000L))
+
+        assertTrue(first > 0)
+        assertTrue(second > 0)
+        assertEquals(2, dao.getAllTransactions().first().size)
+    }
+
+    @Test
+    fun `countMatching inclut le numero de telephone dans la comparaison`() = runTest {
+        dao.insertTransaction(tx(phone = "+26132000001", timestamp = 1_000L))
+
+        assertEquals(
+            1,
+            dao.countMatching("Orange Money", 1_000L, 10_000.0, TransactionType.RECU.storageValue, "+26132000001"),
+        )
+        assertEquals(
+            0,
+            dao.countMatching("Orange Money", 1_000L, 10_000.0, TransactionType.RECU.storageValue, "+26132000002"),
+        )
+    }
+
+    @Test
     fun `sumAmountForClientByType n'agrege que le sens demande`() = runTest {
         dao.insertTransaction(tx(type = TransactionType.RECU.storageValue, amount = 10_000.0, timestamp = 1_000L))
         dao.insertTransaction(tx(type = TransactionType.RECU.storageValue, amount = 5_000.0, timestamp = 2_000L))
