@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Règles de sauvegarde (Android < 12). Les données financières (transactions,
+  numéros clients) et les préférences ne sont pas remontées dans la sauvegarde
+  cloud automatique. Voir data_extraction_rules.xml pour Android 12+.
+-->
 <full-backup-content>
     <exclude domain="database" path="transactify.db" />
     <exclude domain="database" path="transactify.db-wal" />
     <exclude domain="database" path="transactify.db-shm" />
+    <exclude domain="file" path="datastore/" />
+    <exclude domain="sharedpref" path="." />
 </full-backup-content>

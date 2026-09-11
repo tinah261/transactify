@@ -16,6 +16,18 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
+    }
+
+    sourceSets {
+        androidTest {
+            assets.srcDirs += files("$projectDir/schemas")
+        }
     }
 
     buildTypes {
@@ -102,7 +114,7 @@ dependencies {
     // Testing
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'androidx.arch.core:core-testing:2.2.0'
-    testImplementation 'org.mockito:mockito-core:5.4.1'
+    testImplementation 'org.mockito:mockito-core:5.11.0'
     testImplementation 'org.mockito.kotlin:mockito-kotlin:5.1.0'
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

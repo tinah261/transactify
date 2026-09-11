@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Règles d'extraction des données (Android 12+).
+  - cloud-backup  : sauvegarde Google Drive automatique
+  - device-transfer : copie d'appareil à appareil
+
+  On exclut la base transactionnelle et les préférences des DEUX canaux : ce sont
+  des données financières et des numéros de téléphone clients.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="database" path="transactify.db" />
+        <exclude domain="database" path="transactify.db-wal" />
+        <exclude domain="database" path="transactify.db-shm" />
+        <exclude domain="file" path="datastore/" />
+        <exclude domain="sharedpref" path="." />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="database" path="transactify.db" />
+        <exclude domain="database" path="transactify.db-wal" />
+        <exclude domain="database" path="transactify.db-shm" />
+        <exclude domain="file" path="datastore/" />
+        <exclude domain="sharedpref" path="." />
+    </device-transfer>
+</data-extraction-rules>
