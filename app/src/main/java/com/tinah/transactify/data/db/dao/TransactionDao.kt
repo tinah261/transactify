@@ -51,6 +51,22 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions ORDER BY timestamp DESC LIMIT :limit")
     fun getLatestTransactions(limit: Int = 50): Flow<List<Transaction>>
 
+    @Query(
+        """
+        SELECT COUNT(*) FROM transactions
+        WHERE operator = :operator
+          AND timestamp = :timestamp
+          AND amount = :amount
+          AND transaction_type = :type
+        """
+    )
+    suspend fun countMatching(
+        operator: String,
+        timestamp: Long,
+        amount: Double,
+        type: String,
+    ): Int
+
     @Query("DELETE FROM transactions WHERE timestamp < :beforeTime")
     suspend fun deleteOldTransactions(beforeTime: Long): Int
 }

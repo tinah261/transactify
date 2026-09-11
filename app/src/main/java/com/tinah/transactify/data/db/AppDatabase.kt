@@ -8,6 +8,7 @@ import com.tinah.transactify.data.db.dao.ClientDao
 import com.tinah.transactify.data.db.dao.TransactionDao
 import com.tinah.transactify.data.db.entity.Client
 import com.tinah.transactify.data.db.entity.Transaction
+import com.tinah.transactify.utils.Constants
 
 @Database(
     entities = [Transaction::class, Client::class],
@@ -28,7 +29,7 @@ abstract class AppDatabase : RoomDatabase() {
                 Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "transactify.db"
+                    Constants.DATABASE_NAME
                 )
                     .fallbackToDestructiveMigration()
                     .build()
