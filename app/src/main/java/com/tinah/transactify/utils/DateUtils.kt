@@ -29,12 +29,6 @@ object DateUtils {
         return date.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
     }
 
-    /** Bornes [début, fin[ de la journée courante. */
-    fun todayRange(
-        now: Long = System.currentTimeMillis(),
-        zone: ZoneId = ZoneId.systemDefault(),
-    ): LongRange = startOfDay(now, zone) until endOfDay(now, zone)
-
     /** Bornes [début du 1er jour, fin du dernier jour[ pour une période de dates. */
     fun rangeOf(
         from: LocalDate,

@@ -14,4 +14,29 @@
     <string name="nav_reports">Rapports</string>
     <string name="nav_settings">Paramètres</string>
     <string name="placeholder_coming_soon">Bientôt disponible</string>
+
+    <!-- Opérateurs -->
+    <string name="operator_orange_money">Orange Money</string>
+    <string name="operator_airtel_money">Airtel Money</string>
+    <string name="operator_mvola">M-Vola</string>
+
+    <!-- Actions génériques -->
+    <string name="action_save">Enregistrer</string>
+    <string name="action_cancel">Annuler</string>
+
+    <!-- Transactions : liste -->
+    <string name="transactions_filter_all">Tous</string>
+    <string name="transactions_empty_state">Aucune transaction pour ce filtre</string>
+    <string name="transaction_bonus_badge">🎁 Bonus rattaché</string>
+
+    <!-- Transactions : détail -->
+    <string name="nav_transaction_detail">Détail transaction</string>
+    <string name="transaction_detail_phone">Numéro</string>
+    <string name="transaction_detail_date">Date</string>
+    <string name="transaction_detail_reference">Référence</string>
+    <string name="transaction_detail_bonus">Bonus rattaché</string>
+    <string name="transaction_detail_profit">Bénéfice</string>
+    <string name="transaction_detail_edit_profit">Corriger le bénéfice</string>
+    <string name="transaction_detail_delete">Supprimer la transaction</string>
+    <string name="transaction_detail_delete_confirm">Cette action est définitive. Les statistiques du client seront recalculées.</string>
 </resources>

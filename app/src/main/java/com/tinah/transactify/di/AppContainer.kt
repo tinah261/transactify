@@ -10,6 +10,7 @@ import com.tinah.transactify.data.repository.TransactionRepository
 import com.tinah.transactify.domain.usecase.CalculateProfitUseCase
 import com.tinah.transactify.domain.usecase.ClassifyClientUseCase
 import com.tinah.transactify.domain.usecase.GetDashboardSummaryUseCase
+import com.tinah.transactify.domain.usecase.GetTransactionsUseCase
 import com.tinah.transactify.domain.usecase.ProcessSmsUseCase
 import com.tinah.transactify.utils.BonusMatchingService
 
@@ -54,6 +55,10 @@ class AppContainer(context: Context) {
 
     val getDashboardSummaryUseCase: GetDashboardSummaryUseCase by lazy {
         GetDashboardSummaryUseCase(transactionRepository)
+    }
+
+    val getTransactionsUseCase: GetTransactionsUseCase by lazy {
+        GetTransactionsUseCase(transactionRepository)
     }
 }
 

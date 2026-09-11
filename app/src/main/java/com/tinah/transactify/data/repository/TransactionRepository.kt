@@ -36,6 +36,17 @@ class TransactionRepository(
     fun getLatestTransactions(limit: Int = 50): Flow<List<Transaction>> =
         transactionDao.getLatestTransactions(limit)
 
+    fun getTransactionById(id: Int): Flow<Transaction?> =
+        transactionDao.getTransactionById(id)
+
+    /** [operator] = `null` pour ne filtrer sur aucun opérateur. */
+    fun getFilteredTransactions(
+        operator: String?,
+        startInclusive: Long,
+        endExclusive: Long,
+    ): Flow<List<Transaction>> =
+        transactionDao.getFilteredTransactions(operator, startInclusive, endExclusive)
+
     /** Nombre de transactions dans `[startInclusive, endExclusive[` (bornes déjà en fuseau local). */
     fun getTransactionCountInRange(startInclusive: Long, endExclusive: Long): Flow<Int> =
         transactionDao.getTransactionCountInRange(startInclusive, endExclusive)
