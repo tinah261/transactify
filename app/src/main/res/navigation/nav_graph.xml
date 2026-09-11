@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/dashboardFragment">
 
@@ -8,13 +9,23 @@
         android:id="@+id/dashboardFragment"
         android:name="com.tinah.transactify.ui.dashboard.DashboardFragment"
         android:label="@string/nav_dashboard"
-        tools:layout="@layout/fragment_dashboard"
-        xmlns:tools="http://schemas.android.com/tools" />
+        tools:layout="@layout/fragment_dashboard" />
 
     <fragment
         android:id="@+id/transactionsFragment"
         android:name="com.tinah.transactify.ui.transactions.TransactionsFragment"
-        android:label="@string/nav_transactions" />
+        android:label="@string/nav_transactions"
+        tools:layout="@layout/fragment_transactions">
+        <action
+            android:id="@+id/action_transactionsFragment_to_transactionDetailFragment"
+            app:destination="@id/transactionDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/transactionDetailFragment"
+        android:name="com.tinah.transactify.ui.transactions.TransactionDetailFragment"
+        android:label="@string/nav_transaction_detail"
+        tools:layout="@layout/fragment_transaction_detail" />
 
     <fragment
         android:id="@+id/clientsFragment"

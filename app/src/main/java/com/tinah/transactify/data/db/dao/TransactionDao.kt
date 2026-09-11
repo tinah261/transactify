@@ -63,6 +63,29 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions ORDER BY timestamp DESC LIMIT :limit")
     fun getLatestTransactions(limit: Int = 50): Flow<List<Transaction>>
 
+    @Query("SELECT * FROM transactions WHERE id = :id")
+    fun getTransactionById(id: Int): Flow<Transaction?>
+
+    /**
+     * Liste filtrée pour l'écran Transactions : [operator] = `null` -> tous les
+     * opérateurs ; bornes de date toujours requises (l'appelant passe
+     * `0` / `Long.MAX_VALUE` pour « toutes dates »).
+     */
+    @Query(
+        """
+        SELECT * FROM transactions
+        WHERE (:operator IS NULL OR operator = :operator)
+          AND timestamp >= :startInclusive
+          AND timestamp < :endExclusive
+        ORDER BY timestamp DESC
+        """
+    )
+    fun getFilteredTransactions(
+        operator: String?,
+        startInclusive: Long,
+        endExclusive: Long,
+    ): Flow<List<Transaction>>
+
     /** Somme des montants d'un client pour un sens de transaction donné. */
     @Query(
         """
