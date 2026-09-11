@@ -103,6 +103,15 @@
                     android:textSize="28sp"
                     android:textStyle="bold"
                     tools:text="0 Ar" />
+
+                <TextView
+                    android:id="@+id/today_count_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    tools:text="5 transactions aujourd'hui" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -117,8 +126,68 @@
             android:id="@+id/view_clients_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:text="@string/dashboard_view_clients" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/operator_breakdown_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            tools:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/dashboard_operator_breakdown"
+                    android:textColor="@color/text_primary"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:id="@+id/operator_breakdown_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:text="@string/dashboard_latest_transactions"
+            android:textColor="@color/text_primary"
+            android:textStyle="bold" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/latest_transactions_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_transaction" />
+
+        <TextView
+            android:id="@+id/latest_transactions_empty_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text="@string/dashboard_no_transactions"
+            android:textColor="@color/text_secondary"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

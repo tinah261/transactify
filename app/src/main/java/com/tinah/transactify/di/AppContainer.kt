@@ -9,10 +9,14 @@ import com.tinah.transactify.data.repository.ClientRepository
 import com.tinah.transactify.data.repository.TransactionRepository
 import com.tinah.transactify.domain.usecase.CalculateProfitUseCase
 import com.tinah.transactify.domain.usecase.ClassifyClientUseCase
+import com.tinah.transactify.domain.usecase.ExportReportToExcelUseCase
+import com.tinah.transactify.domain.usecase.ExportReportToPdfUseCase
 import com.tinah.transactify.domain.usecase.GetClientsUseCase
 import com.tinah.transactify.domain.usecase.GetDashboardSummaryUseCase
+import com.tinah.transactify.domain.usecase.GetReportDataUseCase
 import com.tinah.transactify.domain.usecase.GetTransactionsUseCase
 import com.tinah.transactify.domain.usecase.ProcessSmsUseCase
+import com.tinah.transactify.domain.usecase.RecalculateProfitsUseCase
 import com.tinah.transactify.utils.BonusMatchingService
 
 /**
@@ -64,6 +68,18 @@ class AppContainer(context: Context) {
 
     val getClientsUseCase: GetClientsUseCase by lazy {
         GetClientsUseCase(clientRepository)
+    }
+
+    val getReportDataUseCase: GetReportDataUseCase by lazy {
+        GetReportDataUseCase(transactionRepository)
+    }
+
+    val exportReportToPdfUseCase: ExportReportToPdfUseCase by lazy { ExportReportToPdfUseCase() }
+
+    val exportReportToExcelUseCase: ExportReportToExcelUseCase by lazy { ExportReportToExcelUseCase() }
+
+    val recalculateProfitsUseCase: RecalculateProfitsUseCase by lazy {
+        RecalculateProfitsUseCase(transactionRepository, calculateProfitUseCase)
     }
 }
 

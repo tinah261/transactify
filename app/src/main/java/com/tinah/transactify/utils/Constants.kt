@@ -30,6 +30,9 @@ object Constants {
     /** Fenêtre de rapprochement d'un SMS bonus avec sa transaction mère (ms). */
     const val BONUS_MATCH_WINDOW_MS = 120_000L
 
+    /** Fenêtre couverte par l'action « re-scanner l'historique SMS » des Paramètres. */
+    const val SMS_RESCAN_WINDOW_MS = 24 * 60 * 60 * 1000L
+
     // --- Notifications / service ------------------------------------------------
 
     const val SERVICE_NOTIFICATION_ID = 42

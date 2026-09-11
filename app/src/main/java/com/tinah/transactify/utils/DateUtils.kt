@@ -45,4 +45,22 @@ object DateUtils {
 
     fun formatDate(epochMillis: Long, zone: ZoneId = ZoneId.systemDefault()): String =
         dateFormatter.format(Instant.ofEpochMilli(epochMillis).atZone(zone))
+
+    /** [LocalDate] (fuseau de l'appareil) correspondant à [epochMillis]. */
+    fun toLocalDate(epochMillis: Long, zone: ZoneId = ZoneId.systemDefault()): LocalDate =
+        Instant.ofEpochMilli(epochMillis).atZone(zone).toLocalDate()
+
+    /**
+     * Bornes epoch `[start, endExclusive[` pour [dateRange], ou « toutes dates »
+     * (`0`, [Long.MAX_VALUE]) si `null`. Centralise une conversion utilisée par
+     * tous les filtres par période (transactions, rapports).
+     */
+    fun boundsOrAllTime(
+        dateRange: ClosedRange<LocalDate>?,
+        zone: ZoneId = ZoneId.systemDefault(),
+    ): Pair<Long, Long> {
+        if (dateRange == null) return 0L to Long.MAX_VALUE
+        val range = rangeOf(dateRange.start, dateRange.endInclusive, zone)
+        return range.first to (range.last + 1)
+    }
 }

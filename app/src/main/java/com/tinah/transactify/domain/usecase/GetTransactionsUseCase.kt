@@ -26,16 +26,10 @@ class GetTransactionsUseCase(
 ) {
 
     operator fun invoke(filter: TransactionFilter = TransactionFilter()): Flow<List<TransactionItem>> {
-        val (startInclusive, endExclusive) = bounds(filter.dateRange)
+        val (startInclusive, endExclusive) = DateUtils.boundsOrAllTime(filter.dateRange)
 
         return transactionRepository
             .getFilteredTransactions(filter.operator?.storageValue, startInclusive, endExclusive)
             .map { transactions -> transactions.mapNotNull { it.toItemOrNull() } }
-    }
-
-    private fun bounds(dateRange: ClosedRange<LocalDate>?): Pair<Long, Long> {
-        if (dateRange == null) return 0L to Long.MAX_VALUE
-        val range = DateUtils.rangeOf(dateRange.start, dateRange.endInclusive)
-        return range.first to (range.last + 1)
     }
 }
